@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Дневник тренировок</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container">
+<header class="date-row">
+<button id="prev-day" class="nav-btn">◀</button>
+<div id="current-date" class="date-label"></div>
+<button id="next-day" class="nav-btn">▶</button>
+</header>
+
+
+<main>
+<table id="entries-table">
+<thead>
+<tr>
+<th>Упражнение</th>
+<th>Вес</th>
+<th>Повторы</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<!-- rows rendered by JS -->
+</tbody>
+</table>
+
+
+<div class="adder">
+<select id="exercise-select">
+<option value="Squat">Присед</option>
+<option value="Bench">Жим лёжа</option>
+<option value="Deadlift">Тяга</option>
+<option value="Press">Жим стоя</option>
+<option value="Pullups">Подтягивания</option>
+</select>
+
+
+<input id="weight-input" type="number" placeholder="Вес" />
+<input id="reps-input" type="number" placeholder="Повторы" />
+<button id="add-btn">Добавить</button>
+</div>
+</main>
+</div>
+
+
+<script src="main.js"></script>
+</body>
+</html>
