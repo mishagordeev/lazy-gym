@@ -19,5 +19,17 @@ db = firestore.client()
 
 app = Flask(__name__)
 
+@app.route('/')
+def character_sheet():
+    doc_ref = db.collection("workouts").document("2025-09-16")
+    doc = doc_ref.get()
+
+    if doc.exists:
+        workout_data = doc.to_dict()
+        return jsonify(workout_data)
+
+    else:
+        return jsonify({"error": "No workout data found."}), 404
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
