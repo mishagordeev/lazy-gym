@@ -29,7 +29,6 @@ def get_entries():
     if not date:
         return jsonify({'error': 'date parameter required (YYYY-MM-DD)'}), 400
 
-
     doc_ref = db.collection('workouts').document(date)
     entries_col = doc_ref.collection('entries')
     docs = entries_col.stream()
@@ -39,9 +38,8 @@ def get_entries():
         data['id'] = d.id
         items.append(data)
 
-
 # sort by name or timestamp if present
-    items = sorted(items, key=lambda x: x.get('name', ''))
+    items = sorted(items, key=lambda x: x.get('index', ''))
     return jsonify(items)
 
 # @app.route('/')
