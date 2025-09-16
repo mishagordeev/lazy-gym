@@ -12,7 +12,7 @@ if service_account:
 else:
     raise ValueError("MY_CREDENTIALS environment variable is not set")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/')
 app.debug = True
 
 db = firestore.client()
