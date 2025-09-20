@@ -3,6 +3,7 @@ import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import Flask, send_from_directory, jsonify, request
+import uuid
 
 service_account = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
@@ -41,6 +42,45 @@ def get_entries():
 # sort by name or timestamp if present
     items = sorted(items, key=lambda x: x.get('index', ''))
     return jsonify(items)
+
+
+# API: add entry
+@app.route('/api/entries', methods=['POST'])
+def add_entry():
+    j = request.get_json() or {}
+    date = j.get('date')
+    name = j.get('name')
+    weight = j.get('weight')
+    reps = j.get('reps')
+    sets = j.get('sets')
+
+    if not (date and name and weight is not None and reps is not None and sets is not None):
+        return jsonify({'error': 'date, name, weight, reps are required'}), 400
+
+    doc_ref = db.collection('workouts').document(date)
+    entries_col = doc_ref.collection('entries')
+
+    docs = entries_col.stream()
+    max_index = -1
+    for d in docs:
+        data = d.to_dict()
+        if 'index' in data and data['index'] > max_index:
+            max_index = data['index']
+
+    new_index = max_index + 1
+
+    entry_id = str(uuid.uuid4())
+    entry = {
+        'name': name,
+        'weight': weight,
+        'reps': reps,
+        'sets': sets,
+        'index': new_index
+    }
+
+    entries_col.document(entry_id).set(entry)
+    entry['id'] = entry_id
+    return jsonify(entry), 201
 
 # @app.route('/')
 # def character_sheet():

@@ -2,9 +2,11 @@ const dateLabel = document.getElementById('current-date');
 const prevBtn = document.getElementById('prev-day');
 const nextBtn = document.getElementById('next-day');
 const tableBody = document.querySelector('#entries-table tbody');
-const exerciseSelect = document.getElementById('exercise-select');
+// const exerciseSelect = document.getElementById('exercise-select');
+const exerciseInput = document.getElementById('name-input');
 const weightInput = document.getElementById('weight-input');
 const repsInput = document.getElementById('reps-input');
+const setsInput = document.getElementById('sets-input');
 const addBtn = document.getElementById('add-btn');
 
 
@@ -55,21 +57,24 @@ function renderEntries(entries) {
 
 async function addEntry() {
     const date = formatDate(currentDate);
-    const name = exerciseSelect.value;
+    const name = exerciseInput.value;
     const weight = weightInput.value;
     const reps = repsInput.value;
-    if (!weight || !reps) return alert('Введите вес и количество повторов');
+    const sets = setsInput.value;
+    if (!weight || !reps || !sets) return alert('Введите вес и количество повторов');
 
 
-    const payload = { date, name, weight: Number(weight), reps: Number(reps) };
+    const payload = { date, name, weight, reps, sets };
     const res = await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
     if (res.ok) {
+        exerciseInput.value = '';
         weightInput.value = '';
         repsInput.value = '';
+        setsInput.value = '';
         await loadEntries();
     } else {
         const err = await res.json();
