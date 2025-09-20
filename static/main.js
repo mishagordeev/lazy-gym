@@ -46,8 +46,7 @@ function renderEntries(entries) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
 <td>${e.name}</td>
-<td>${e.weight}</td>
-<td>${e.reps}</td>
+<td style="text-align: right;">${e.weight} x ${e.reps} x ${e.sets}</td>
 <td><button class="del-btn" data-id="${e.id}">Удалить</button></td>`;
         tableBody.appendChild(tr);
     });
