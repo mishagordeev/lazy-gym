@@ -2,7 +2,7 @@ const dateLabel = document.getElementById('current-date');
 const prevBtn = document.getElementById('prev-day');
 const nextBtn = document.getElementById('next-day');
 const tableBody = document.querySelector('#entries-table tbody');
-const exerciseInput = document.getElementById('name-input');
+const exerciseInput = document.getElementById('exercise-select');
 const weightInput = document.getElementById('weight-input');
 const repsInput = document.getElementById('reps-input');
 const setsInput = document.getElementById('sets-input');
@@ -10,6 +10,7 @@ const addBtn = document.getElementById('add-btn');
 
 let currentDate = new Date();
 let editingEntryId = null; // ID записи, которая сейчас редактируется
+let exercises = {};
 
 function formatDate(d) {
     const yyyy = d.getFullYear();
@@ -39,12 +40,17 @@ function renderEntries(entries) {
         return;
     }
     tableBody.innerHTML = '';
+    console.log(exercises);
     entries.forEach(e => {
         // Основная строка записи
         const tr = document.createElement('tr');
         tr.dataset.id = e.id;
         tr.innerHTML = `
-            <td>${e.name}</td>
+            <td>
+                <a href="/exercise/${e.exercise_id}" class="exercise-link">
+                    ${exercises[e.exercise_id].name}
+                </a>
+            </td>
             <td style="text-align: right;">${e.weight} x ${e.reps} x ${e.sets}</td>
             <td>
                 <button class="edit-btn" data-id="${e.id}">Редактировать</button>
@@ -80,14 +86,14 @@ function renderEntries(entries) {
 
 async function addEntry() {
     const date = formatDate(currentDate);
-    const name = exerciseInput.value;
+    const exercise_id = exerciseInput.value;
     const weight = weightInput.value;
     const reps = repsInput.value;
     const sets = setsInput.value;
     
     if (!weight || !reps || !sets) return alert('Введите вес и количество повторов');
 
-    const payload = { date, name, weight, reps, sets };
+    const payload = { date, exercise_id, weight, reps, sets };
     const res = await fetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,6 +134,18 @@ async function updateEntry(id, updatedData) {
         alert('Ошибка при обновлении: ' + (err.error || 'unknown'));
         return false;
     }
+}
+
+async function loadExercises() {
+
+    const res = await fetch("/api/exercises")
+    const data = await res.json()
+
+    exercises = Object.fromEntries(
+        data.map(({ id, ...rest }) => [id, rest])
+    );
+
+    populateDropdown(data)
 }
 
 function showEditForm(id) {
@@ -213,6 +231,23 @@ nextBtn.addEventListener('click', () => {
 
 addBtn.addEventListener('click', addEntry);
 
+function populateDropdown(exercisesList) {
+
+    exerciseInput.innerHTML = ""
+
+    exercisesList.forEach(e => {
+
+        const option = document.createElement("option")
+
+        option.value = e.id
+        option.textContent = e.name
+
+        exerciseInput.appendChild(option)
+
+    })
+}
+
 // Инициализация
 displayDate();
 loadEntries();
+loadExercises();
