@@ -146,29 +146,54 @@ saveEntryBtn.addEventListener('click', async () => {
     const sets = [];
     
     rows.forEach(r => {
-        const weight = r.querySelector('.input-weight').value;
-        const reps = r.querySelector('.input-reps').value;
-        if (weight && reps) {
-            sets.append({ weight: parseFloat(weight), reps: parseInt(reps) });
+        const weightInput = r.querySelector('.input-weight');
+        const repsInput = r.querySelector('.input-reps');
+        
+        if (weightInput && repsInput) {
+            const weight = weightInput.value;
+            const reps = repsInput.value;
+            
+            if (weight !== '' && reps !== '') {
+                // В JavaScript для добавления в массив используется .push(), а не .append()!
+                sets.push({ 
+                    weight: parseFloat(weight), 
+                    reps: parseInt(reps) 
+                });
+            }
         }
     });
     
-    if (!sets.length) return alert('Добавьте хотя бы один заполненный подход');
+    if (!sets.length) return alert('Добавьте хотя бы один заполненный подход (вес и повторы)');
     
-    const payload = { date: formatDate(currentDate), exercise_id: selectedExercise.id, sets };
+    const payload = { 
+        date: formatDate(currentDate), 
+        exercise_id: selectedExercise.id, 
+        sets 
+    };
     
-    const res = await fetch('/api/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-    
-    if (res.ok) {
-        setsContainer.innerHTML = '';
-        selectedExercise = null;
-        selectedExName.textContent = 'Упражнение не выбрано';
-        maxWeightBadge.textContent = '';
-        updatePage();
+    try {
+        const res = await fetch('/api/entries', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        if (res.ok) {
+            // Очищаем форму после успешного сохранения
+            setsContainer.innerHTML = '';
+            selectedExercise = null;
+            selectedExName.textContent = 'Упражнение не выбрано';
+            maxWeightBadge.textContent = '';
+            
+            // Обновляем данные на странице и в календаре
+            await updatePage();
+        } else {
+            const err = await res.json();
+            alert('Ошибка сервера: ' + (err.error || 'Не удалось сохранить'));
+        }
+    } catch (e) {
+        console.error('Ошибка сети:', e);
+        alert('Ошибка при отправке данных на сервер');
     }
 });
 
