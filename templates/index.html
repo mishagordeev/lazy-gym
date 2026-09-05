@@ -2,16 +2,23 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Дневник тренировок</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Дневник тренировок 2.0</title>
     <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
     <div class="container">
-        <header class="date-row">
-            <button id="prev-day" class="nav-btn">◀</button>
-            <div id="current-date" class="date-label"></div>
-            <button id="next-day" class="nav-btn">▶</button>
+        
+        <header class="calendar-wrapper">
+            <div class="calendar-header">
+                <button id="prev-day" class="icon-btn">◀</button>
+                <div id="current-date"></div>
+                <button id="next-day" class="icon-btn">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
         </header>
 
         <main>
@@ -19,25 +26,51 @@
                 <thead>
                     <tr>
                         <th>Упражнение</th>
-                        <th style="text-align: right;">Вес x Повторы x Подходы</th>
-                        <th>Действия</th>
+                        <th>Подходы</th>
+                        <th style="text-align: right;">Действия</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- rows rendered by JS -->
-                </tbody>
+                <tbody></tbody>
             </table>
 
-            <div class="adder">
-                <select id="exercise-select"></select>
-                <input id="weight-input" type="text" placeholder="Вес" />
-                <input id="reps-input" type="text" placeholder="Повторения" />
-                <input id="sets-input" type="text" placeholder="Подходы" />
-                <button id="add-btn">Добавить</button>
-            </div>
+            <section id="adder-section" style="border-top: 2px solid var(--border); padding-top: 15px;">
+                <div class="section-title">
+                    <span id="selected-exercise-name">Упражнение не выбрано</span>
+                    <span id="max-weight-badge" class="max-badge"></span>
+                </div>
+                
+                <div id="sets-container">
+                    </div>
+                
+                <button type="button" id="add-set-row-btn" class="btn btn-secondary" style="margin-bottom: 12px;">+ Добавить подход</button>
+                <button id="save-entry-btn" class="btn">Сохранить упражнение в лог</button>
+            </section>
+
+            <section class="search-block">
+                <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">🔍 Поиск и фильтр упражнений</div>
+                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <input id="search-input" type="text" placeholder="Название..." />
+                    <select id="filter-category" style="max-width: 130px;">
+                        <option value="">Все группы</option>
+                        <option value="Грудь">Грудь</option>
+                        <option value="Спина">Спина</option>
+                        <option value="Ноги">Ноги</option>
+                        <option value="Плечи">Плечи</option>
+                        <option value="Руки">Руки</option>
+                    </select>
+                </div>
+
+                <div id="exercise-list" class="exercise-list"></div>
+
+                <div style="display: flex; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
+                    <input id="quick-create-name" type="text" placeholder="Новое упражнение на лету..." />
+                    <button id="quick-create-btn" class="btn btn-secondary" style="white-space: nowrap;">Создать</button>
+                </div>
+            </section>
         </main>
     </div>
 
     <script src="/static/main.js"></script>
+    <script src="/static/search.js"></script>
 </body>
 </html>
