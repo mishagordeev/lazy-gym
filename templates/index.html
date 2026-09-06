@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Дневник тренировок 2.0</title>
     <link rel="stylesheet" href="/static/style.css" />
-    
-    <!-- Firebase Web SDK (v9+ Compatibility build) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
         
-        <!-- Блок авторизации -->
-        <div id="auth-block" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div id="user-info" style="font-size: 13px; font-weight: bold;"></div>
-            <button id="auth-btn" class="btn btn-secondary" style="width: auto; padding: 6px 12px;">Войти через Google</button>
-        </div>
+        <!-- Карточка авторизации -->
+        <header class="auth-card">
+            <div id="user-info" class="user-info">
+                <img id="user-avatar" class="user-avatar" src="" alt="Avatar" style="display: none;" />
+                <span id="user-name" class="user-name">Гость (войдите для синхронизации)</span>
+            </div>
+            <button id="auth-btn" class="btn btn-auth">Войти через Google</button>
+        </header>
 
-        <!-- Контент тренировок (скрыт до авторизации) -->
+        <!-- Контент тренировок -->
         <div id="app-content" style="display: none;">
             <header class="calendar-wrapper">
                 <div class="calendar-header">
@@ -82,14 +81,12 @@
         </div>
     </div>
 
-<!-- 1. Внешние библиотеки Firebase -->
+    <!-- 1. Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-    <!-- 2. Наш изолированный модуль авторизации -->
+    <!-- 2. Модули приложения -->
     <script src="/static/auth.js"></script>
-
-    <!-- 3. Основные модули приложения -->
     <script src="/static/main.js"></script>
     <script src="/static/search.js"></script>
 </body>

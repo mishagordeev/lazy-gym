@@ -7,16 +7,17 @@ const quickCreateBtn = document.getElementById('quick-create-btn');
 let allExercises = [];
 
 async function fetchExercises() {
-    const res = await fetch('/api/exercises');
-    if (res.ok) {
+    const res = await fetchWithAuth('/api/exercises');
+    if (res && res.ok) {
         allExercises = await res.json();
         renderList();
     }
 }
 
 function renderList() {
-    const query = searchInput.value.toLowerCase();
-    const category = filterSelect.value;
+    if (!exerciseListContainer) return;
+    const query = searchInput ? searchInput.value.toLowerCase() : '';
+    const category = filterSelect ? filterSelect.value : '';
     
     exerciseListContainer.innerHTML = '';
     
@@ -43,39 +44,40 @@ function renderList() {
         `;
         
         item.querySelector('.select-ex-btn').addEventListener('click', () => {
-            // Вызываем функцию главного экрана родительского окна
-            window.selectExercise(ex.id, ex.name);
-            // Закрываем модальное окно / прокручиваем к форме
-            document.getElementById('adder-section').scrollIntoView({ behavior: 'smooth' });
+            if (typeof window.selectExercise === 'function') {
+                window.selectExercise(ex.id, ex.name);
+            }
+            const adder = document.getElementById('adder-section');
+            if (adder) adder.scrollIntoView({ behavior: 'smooth' });
         });
         
         exerciseListContainer.appendChild(item);
     });
 }
 
-// Темповое добавление упражнения прямо из поиска (Пункт 2)
-quickCreateBtn.addEventListener('click', async () => {
-    const name = quickCreateInput.value.trim();
-    const category = filterSelect.value || 'Разное';
-    
-    if(!name) return alert('Введите название для быстрого создания');
-    
-    const res = await fetch('/api/exercises', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ name, category })
+if (quickCreateBtn) {
+    quickCreateBtn.addEventListener('click', async () => {
+        const name = quickCreateInput ? quickCreateInput.value.trim() : '';
+        const category = filterSelect ? filterSelect.value || 'Разное' : 'Разное';
+        
+        if(!name) return alert('Введите название для создания');
+        
+        const res = await fetchWithAuth('/api/exercises', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, category })
+        });
+        
+        if(res && res.ok) {
+            const newEx = await res.json();
+            if (quickCreateInput) quickCreateInput.value = '';
+            await fetchExercises();
+            if (typeof window.selectExercise === 'function') {
+                window.selectExercise(newEx.id, newEx.name);
+            }
+        }
     });
-    
-    if(res.ok) {
-        const newEx = await res.json();
-        quickCreateInput.value = '';
-        await fetchExercises();
-        window.selectExercise(newEx.id, newEx.name);
-    }
-});
+}
 
-searchInput.addEventListener('input', renderList);
-filterSelect.addEventListener('change', renderList);
-
-// Старт
-fetchExercises();
+if (searchInput) searchInput.addEventListener('input', renderList);
+if (filterSelect) filterSelect.addEventListener('change', renderList);
