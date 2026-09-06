@@ -42,7 +42,8 @@ async function fetchWithAuth(url, options = {}) {
  */
 function initAuthUI(onLoginCallback, onLogoutCallback) {
     const authBtn = document.getElementById('auth-btn');
-    const userInfo = document.getElementById('user-info');
+    const userName = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
     const appContent = document.getElementById('app-content');
 
     if (authBtn) {
@@ -50,27 +51,40 @@ function initAuthUI(onLoginCallback, onLogoutCallback) {
             if (currentUser) {
                 auth.signOut();
             } else {
+                // Вызов официального всплывающего окна авторизации Google
                 auth.signInWithPopup(googleProvider).catch(err => {
-                    alert('Ошибка авторизации: ' + err.message);
+                    alert('Ошибка входа через Google: ' + err.message);
                 });
             }
         });
     }
 
-    // Слушатель изменения состояния входа
     auth.onAuthStateChanged(async (user) => {
         currentUser = user;
         if (user) {
-            if (userInfo) userInfo.textContent = user.displayName || user.email;
-            if (authBtn) authBtn.textContent = 'Выйти';
+            // Заполняем данные профиля из аккаунта Google
+            if (userName) userName.textContent = user.displayName || user.email;
+            if (userAvatar) {
+                userAvatar.src = user.photoURL || '';
+                userAvatar.style.display = user.photoURL ? 'block' : 'none';
+            }
+            if (authBtn) {
+                authBtn.textContent = 'Выйти';
+                authBtn.classList.add('logout');
+            }
             if (appContent) appContent.style.display = 'block';
             
             if (typeof onLoginCallback === 'function') {
                 await onLoginCallback(user);
             }
         } else {
-            if (userInfo) userInfo.textContent = 'Войдите для доступа';
-            if (authBtn) authBtn.textContent = 'Войти через Google';
+            // Гостевой режим
+            if (userName) userName.textContent = 'Войдите для синхронизации';
+            if (userAvatar) userAvatar.style.display = 'none';
+            if (authBtn) {
+                authBtn.textContent = 'Войти через Google';
+                authBtn.classList.remove('logout');
+            }
             if (appContent) appContent.style.display = 'none';
             
             if (typeof onLogoutCallback === 'function') {

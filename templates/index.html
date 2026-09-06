@@ -5,72 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Дневник тренировок 2.0</title>
     <link rel="stylesheet" href="/static/style.css" />
+    
+    <!-- Firebase Web SDK (v9+ Compatibility build) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
     <div class="container">
         
-        <header class="calendar-wrapper">
-            <div class="calendar-header">
-                <button id="prev-day" class="icon-btn">◀</button>
-                <div id="current-date"></div>
-                <button id="next-day" class="icon-btn">▶</button>
-            </div>
-            <div class="calendar-weekdays">
-                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
-            </div>
-            <div id="calendar-grid" class="calendar-grid"></div>
-        </header>
+        <!-- Блок авторизации -->
+        <div id="auth-block" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div id="user-info" style="font-size: 13px; font-weight: bold;"></div>
+            <button id="auth-btn" class="btn btn-secondary" style="width: auto; padding: 6px 12px;">Войти через Google</button>
+        </div>
 
-        <main>
-            <table id="entries-table">
-                <thead>
-                    <tr>
-                        <th>Упражнение</th>
-                        <th>Подходы</th>
-                        <th style="text-align: right;">Действия</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-
-            <section id="adder-section" style="border-top: 2px solid var(--border); padding-top: 15px;">
-                <div class="section-title">
-                    <span id="selected-exercise-name">Упражнение не выбрано</span>
-                    <span id="max-weight-badge" class="max-badge"></span>
+        <!-- Контент тренировок (скрыт до авторизации) -->
+        <div id="app-content" style="display: none;">
+            <header class="calendar-wrapper">
+                <div class="calendar-header">
+                    <button id="prev-day" class="icon-btn">◀</button>
+                    <div id="current-date"></div>
+                    <button id="next-day" class="icon-btn">▶</button>
                 </div>
-                
-                <div id="sets-container">
+                <div class="calendar-weekdays">
+                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </header>
+
+            <main>
+                <table id="entries-table">
+                    <thead>
+                        <tr>
+                            <th>Упражнение</th>
+                            <th>Подходы</th>
+                            <th style="text-align: right;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <section id="adder-section" style="border-top: 2px solid var(--border); padding-top: 15px;">
+                    <div class="section-title">
+                        <span id="selected-exercise-name">Упражнение не выбрано</span>
+                        <span id="max-weight-badge" class="max-badge"></span>
                     </div>
-                
-                <button type="button" id="add-set-row-btn" class="btn btn-secondary" style="margin-bottom: 12px;">+ Добавить подход</button>
-                <button id="save-entry-btn" class="btn">Сохранить упражнение в лог</button>
-            </section>
+                    
+                    <div id="sets-container"></div>
+                    
+                    <button type="button" id="add-set-row-btn" class="btn btn-secondary" style="margin-bottom: 12px;">+ Добавить подход</button>
+                    <button id="save-entry-btn" class="btn">Сохранить упражнение в лог</button>
+                </section>
 
-            <section class="search-block">
-                <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">🔍 Поиск и фильтр упражнений</div>
-                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <input id="search-input" type="text" placeholder="Название..." />
-                    <select id="filter-category" style="max-width: 130px;">
-                        <option value="">Все группы</option>
-                        <option value="Грудь">Грудь</option>
-                        <option value="Спина">Спина</option>
-                        <option value="Ноги">Ноги</option>
-                        <option value="Плечи">Плечи</option>
-                        <option value="Руки">Руки</option>
-                    </select>
-                </div>
+                <section class="search-block">
+                    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">🔍 Поиск и фильтр упражнений</div>
+                    <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                        <input id="search-input" type="text" placeholder="Название..." />
+                        <select id="filter-category" style="max-width: 130px;">
+                            <option value="">Все группы</option>
+                            <option value="Грудь">Грудь</option>
+                            <option value="Спина">Спина</option>
+                            <option value="Ноги">Ноги</option>
+                            <option value="Плечи">Плечи</option>
+                            <option value="Руки">Руки</option>
+                        </select>
+                    </div>
 
-                <div id="exercise-list" class="exercise-list"></div>
+                    <div id="exercise-list" class="exercise-list"></div>
 
-                <div style="display: flex; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
-                    <input id="quick-create-name" type="text" placeholder="Новое упражнение на лету..." />
-                    <button id="quick-create-btn" class="btn btn-secondary" style="white-space: nowrap;">Создать</button>
-                </div>
-            </section>
-        </main>
+                    <div style="display: flex; gap: 6px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
+                        <input id="quick-create-name" type="text" placeholder="Новое упражнение на лету..." />
+                        <button id="quick-create-btn" class="btn btn-secondary" style="white-space: nowrap;">Создать</button>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
-    <!-- 1. Внешние библиотеки Firebase -->
+<!-- 1. Внешние библиотеки Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
