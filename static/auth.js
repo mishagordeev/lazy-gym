@@ -1,11 +1,11 @@
 // Конфигурация Firebase
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID"
+  apiKey: "AIzaSyDsJTM3S2AAs7WWoWOcBbdAtbXHUcchWG8",
+  authDomain: "lazy-workouts.firebaseapp.com",
+  projectId: "lazy-workouts",
+  storageBucket: "lazy-workouts.firebasestorage.app",
+  messagingSenderId: "1040286454673",
+  appId: "1:1040286454673:web:bff26b5a9a084e98ef8030"
 };
 
 // Инициализация
