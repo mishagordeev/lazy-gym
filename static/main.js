@@ -2,6 +2,31 @@ let currentDate = new Date();
 let trainedDays = new Set();
 let selectedExercise = null;
 
+async function onUserLoggedIn(user) {
+    console.log("Пользователь авторизован:", user.email);
+    await updatePage();
+    if (typeof fetchExercises === 'function') {
+        fetchExercises();
+    }
+}
+
+function onUserLoggedOut() {
+    console.log("Пользователь вышел из системы");
+    tableBody.innerHTML = '';
+}
+
+// Запускаем модуль авторизации
+initAuthUI(onUserLoggedIn, onUserLoggedOut);
+
+// Все вызовы сетевых запросов используют чистый fetchWithAuth
+async function loadEntries() {
+    const date = formatDate(currentDate);
+    const res = await fetchWithAuth(`/api/entries?date=${date}`);
+    if (!res || !res.ok) return;
+    const entries = await res.json();
+    renderEntries(entries);
+}
+
 // Инициализация UI элементов
 const dateLabel = document.getElementById('current-date');
 const prevBtn = document.getElementById('prev-day');

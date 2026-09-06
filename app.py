@@ -1,9 +1,11 @@
 import os
 import json
 import firebase_admin
-import uuid
 from firebase_admin import credentials, firestore
 from flask import Flask, request, jsonify, render_template
+
+# Импортируем наш модуль авторизации
+from auth import login_required
 
 service_account = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
@@ -11,29 +13,28 @@ if service_account:
     cred = credentials.Certificate(json.loads(service_account))
     firebase_admin.initialize_app(cred)
 else:
-    raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set")
+    # Загрузка локального файла ключа для разработки
+    cred = credentials.Certificate('firebase-key.json')
+    firebase_admin.initialize_app(cred)
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
-app.debug = True
-
 db = firestore.client()
+
+def user_db(uid):
+    """Возвращает ссылку на изолированное хранилище пользователя."""
+    return db.collection('users').document(uid)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/exercises')
-def exercises_page():
-    return render_template('exercises.html')
-
-# API: Получить список дат, в которые были тренировки (для календаря)
 @app.route('/api/workouts/trained-days', methods=['GET'])
+@login_required
 def get_trained_days():
-    docs = db.collection('workouts').stream()
+    docs = user_db(request.user_id).collection('workouts').stream()
     trained_days = []
     for d in docs:
-        # Проверяем, есть ли упражнения в этот день
-        entries = db.collection('workouts').document(d.id).collection('entries').limit(1).stream()
+        entries = user_db(request.user_id).collection('workouts').document(d.id).collection('entries').limit(1).stream()
         if any(entries):
             trained_days.append(d.id)
     return jsonify(trained_days)
