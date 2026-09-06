@@ -174,21 +174,15 @@ saveEntryBtn.addEventListener('click', async () => {
         const weightInput = r.querySelector('.input-weight');
         const repsInput = r.querySelector('.input-reps');
         
-        if (weightInput && repsInput) {
-            const weight = weightInput.value;
-            const reps = repsInput.value;
-            
-            if (weight !== '' && reps !== '') {
-                // В JavaScript для добавления в массив используется .push(), а не .append()!
-                sets.push({ 
-                    weight: parseFloat(weight), 
-                    reps: parseInt(reps) 
-                });
-            }
+        if (weightInput && repsInput && weightInput.value !== '' && repsInput.value !== '') {
+            sets.push({ 
+                weight: parseFloat(weightInput.value), 
+                reps: parseInt(repsInput.value) 
+            });
         }
     });
     
-    if (!sets.length) return alert('Добавьте хотя бы один заполненный подход (вес и повторы)');
+    if (!sets.length) return alert('Добавьте хотя бы один заполненный подход');
     
     const payload = { 
         date: formatDate(currentDate), 
@@ -197,24 +191,31 @@ saveEntryBtn.addEventListener('click', async () => {
     };
     
     try {
-        const res = await fetch('/api/entries', {
+        const res = await fetchWithAuth('/api/entries', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         
-        if (res.ok) {
-            // Очищаем форму после успешного сохранения
-            setsContainer.innerHTML = '';
-            selectedExercise = null;
-            selectedExName.textContent = 'Упражнение не выбрано';
-            maxWeightBadge.textContent = '';
-            
-            // Обновляем данные на странице и в календаре
-            await updatePage();
+        if (!res) return alert('Вы не авторизованы');
+
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await res.json();
+            if (res.ok) {
+                setsContainer.innerHTML = '';
+                selectedExercise = null;
+                selectedExName.textContent = 'Упражнение не выбрано';
+                maxWeightBadge.textContent = '';
+                await updatePage();
+            } else {
+                alert('Ошибка: ' + (data.error || 'Не удалось сохранить'));
+            }
         } else {
-            const err = await res.json();
-            alert('Ошибка сервера: ' + (err.error || 'Не удалось сохранить'));
+            // Если сервер ответил HTML-страницей с ошибкой
+            const rawText = await res.text();
+            console.error('Сервер вернул не JSON:', rawText);
+            alert(`Ошибка сервера (${res.status}). Проверьте логи Vercel.`);
         }
     } catch (e) {
         console.error('Ошибка сети:', e);
