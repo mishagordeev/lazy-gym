@@ -47,13 +47,19 @@ async function loadTrainedDays() {
 function renderCalendar() {
     if (!calendarGrid) return;
     calendarGrid.innerHTML = '';
+    
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+    
+    // Вычисляем реальную сегодняшнюю дату
+    const today = new Date();
+    const todayDateStr = formatDate(today);
     
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = new Date(year, month + 1, 0).getDate();
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
     
+    // Смещение пустых ячеек
     for (let i = 0; i < startOffset; i++) {
         calendarGrid.appendChild(document.createElement('div'));
     }
@@ -64,8 +70,11 @@ function renderCalendar() {
         cell.textContent = day;
         
         const cellDateStr = formatDate(new Date(year, month, day));
-        if (trainedDays.has(cellDateStr)) cell.classList.add('trained');
-        if (cellDateStr === formatDate(currentDate)) cell.classList.add('active');
+        
+        // Добавляем точки и обводки
+        if (cellDateStr === todayDateStr) cell.classList.add('today');       // Сегодняшний день (Обводка)
+        if (trainedDays.has(cellDateStr)) cell.classList.add('trained');     // Была тренировка (Точка снизу)
+        if (cellDateStr === formatDate(currentDate)) cell.classList.add('active'); // Выбранный день (Заливка)
         
         cell.addEventListener('click', () => {
             currentDate = new Date(year, month, day);
