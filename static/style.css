@@ -77,16 +77,14 @@ body {
     color: var(--primary);
     font-weight: bold;
 }
-.calendar-day.trained {
-    background-color: #dbeafe;
-    color: var(--primary);
-}
 .calendar-day.trained::after {
     content: '';
     position: absolute;
     bottom: 3px;
-    width: 5px;
-    height: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
     background-color: var(--primary);
     border-radius: 50%;
 }

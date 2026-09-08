@@ -37,11 +37,25 @@ function formatDate(d) {
 }
 
 async function loadTrainedDays() {
-    const res = await fetchWithAuth('/api/workouts/trained-days');
-    if (res && res.ok) {
-        const days = await res.json();
-        trainedDays = new Set(days);
+    try {
+        const res = await fetchWithAuth('/api/workouts/trained-days');
+        if (res && res.ok) {
+            const days = await res.json();
+            trainedDays = new Set(days);
+            console.log("Загруженные дни тренировок:", Array.from(trainedDays));
+        } else {
+            console.error("Не удалось загрузить дни тренировок");
+        }
+    } catch (e) {
+        console.error("Ошибка при запросе дней тренировок:", e);
     }
+}
+
+async function updatePage() {
+    // Строгая последовательность: сначала загружаем дни, потом рендерим календарь и записи
+    await loadTrainedDays();
+    renderCalendar();
+    await loadEntries();
 }
 
 function renderCalendar() {

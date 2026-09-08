@@ -53,13 +53,26 @@ def index():
 @app.route('/api/workouts/trained-days', methods=['GET'])
 @login_required
 def get_trained_days():
-    docs = user_db(request.user_id).collection('workouts').stream()
-    trained_days = []
-    for d in docs:
-        entries = user_db(request.user_id).collection('workouts').document(d.id).collection('entries').limit(1).stream()
-        if any(entries):
-            trained_days.append(d.id)
-    return jsonify(trained_days)
+    try:
+        # Ищем все записи из подколлекций 'entries', принадлежащие текущему пользователю
+        entries_query = db.collection_group('entries').stream()
+        
+        trained_days = set()
+        user_prefix = f"users/{request.user_id}/workouts/"
+        
+        for doc in entries_query:
+            path = doc.reference.path
+            # Проверяем, что запись принадлежит именно этому пользователю
+            if path.startswith(user_prefix):
+                # Путь выглядит так: users/UID/workouts/YYYY-MM-DD/entries/ENTRY_ID
+                parts = path.split('/')
+                if len(parts) >= 4:
+                    date_str = parts[3]
+                    trained_days.add(date_str)
+                    
+        return jsonify(list(trained_days))
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 # API: Записи за конкретный день (GET и POST)
 @app.route('/api/entries', methods=['GET', 'POST'])
